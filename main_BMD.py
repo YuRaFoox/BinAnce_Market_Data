@@ -2,6 +2,7 @@ from datetime import datetime
 from binance.client import Client
 import time
 from decimal import Decimal
+from collections import deque
 
 # Create a Binance client
 client = Client('iJw7FfZIXfo44dV9QXED8pRfBdRvFMdXsx4acSj7T4bUB7Q4nuORt4micZfq5NsW',
@@ -20,6 +21,8 @@ algo_curr_pri = 0.00000765
 
 # Keep track of price movements in the last 15 minutes
 price_history = []
+# Keep track of executed buy orders (deque with a maximum length of 144)
+executed_buy_prices = deque(maxlen=144)
 
 
 def get_price_history():
@@ -32,6 +35,8 @@ def get_price_history():
 
 
 def should_buy(current_price, algo_curr_pri):
+    if current_price in executed_buy_prices:
+        return False
     # Calculate the price drop percentage
     if algo_curr_pri == 0:
         return False
@@ -43,6 +48,7 @@ def should_buy(current_price, algo_curr_pri):
 
 def step_algo(buy_amt, algo_curr_pri, sell_order_counter=0):
     global price_history
+    global executed_buy_prices
     current_time = datetime.now()
     formatted_time = current_time.strftime("%d-%m-%Y %H:%M:%S")
     print('----------------------------')
@@ -68,6 +74,8 @@ def step_algo(buy_amt, algo_curr_pri, sell_order_counter=0):
                 sell_order = client.create_order(symbol=symbol, side='SELL', type='LIMIT', timeInForce='GTC',
                                                  price=sell_price, quantity=qty)
                 sell_order_counter += 1
+                # Add executed buy price to the set
+                executed_buy_prices.append(buy_price)
                 algo_curr_pri = float(sell_order['price'])
                 Profit_Cents = (((float(buy_amt / buy_price)) - (float(buy_amt / sell_price)))
                                 * float(sell_price)) * sell_order_counter
@@ -95,6 +103,8 @@ def step_algo(buy_amt, algo_curr_pri, sell_order_counter=0):
                     sell_order = client.create_order(symbol=symbol, side='SELL', type='LIMIT', timeInForce='GTC',
                                                      price=str(sell_price), quantity=qty)
                     sell_order_counter += 1
+                    # Add executed buy price to the set
+                    executed_buy_prices.append(buy_price)
                     algo_curr_pri = float(sell_order['price'])
                     Profit_Cents = (((float(buy_amt / buy_price)) - (float(buy_amt / sell_price)))
                                     * float(sell_price)) * sell_order_counter

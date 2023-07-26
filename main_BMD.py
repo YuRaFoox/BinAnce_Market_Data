@@ -64,37 +64,41 @@ def step_algo(buy_amt, algo_curr_pri, sell_order_counter=0):
         should_buy(current_price, algo_curr_pri)
         try:
             # Your algorithmic conditions and actions go here
-            if current_price > algo_curr_pri and should_buy(current_price, algo_curr_pri):
-                buy_order = client.create_order(symbol=symbol, side='BUY', type='MARKET', quantity=qty)
-                buy_price = float(buy_order['fills'][0]['price'])
-                print(float(buy_price), "= Buy price", flush=True)
-                print(qty, "= Buy quantity", flush=True)
-                print('Bought_Course_UP!', flush=True)
-                sell_price = round(buy_price + step_course, 8)
-                sell_price = Decimal("{:.8f}".format(sell_price))
-                sell_order = client.create_order(symbol=symbol, side='SELL', type='LIMIT', timeInForce='GTC',
-                                                 price=sell_price, quantity=qty)
-                sell_order_counter += 1
-                # Add executed buy price to the set
-                executed_buy_prices.append(buy_price)
-                algo_curr_pri = float(sell_order['price'])
-                Profit_Cents = (((float(buy_amt / buy_price)) - (float(buy_amt / sell_price)))
-                                * float(sell_price)) * sell_order_counter
-                Profit_Cents = round(Profit_Cents, 2)
-                current_time = datetime.now()
-                formatted_time = current_time.strftime("%d-%m-%Y %H:%M:%S")
-                print('-', formatted_time, '-', flush=True)
-                print(float(algo_curr_pri), "= Sell price", flush=True)
-                print(qty, "= Sell quantity", flush=True)
-                print('Sell orders have placed -> ' + str(sell_order_counter) + 'pcs',
-                      '(' + str(Profit_Cents) + '$' + ')', flush=True)
-                print("----------------------------", flush=True)
-            elif current_price < algo_curr_pri - (step_course * 2) and should_buy(current_price, algo_curr_pri):
+            if current_price > algo_curr_pri:
+                if should_buy(current_price, algo_curr_pri):
+                    buy_order = client.create_order(symbol=symbol, side='BUY', type='MARKET', quantity=qty)
+                    buy_price = float(buy_order['fills'][0]['price'])
+                    # Add executed buy price to the set
+                    executed_buy_prices.append(buy_price)
+                    print(float(buy_price), "= Buy price", flush=True)
+                    print(qty, "= Buy quantity", flush=True)
+                    print('Bought_Course_UP!', flush=True)
+                    sell_price = round(buy_price + step_course, 8)
+                    sell_price = Decimal("{:.8f}".format(sell_price))
+                    sell_order = client.create_order(symbol=symbol, side='SELL', type='LIMIT', timeInForce='GTC',
+                                                     price=sell_price, quantity=qty)
+                    sell_order_counter += 1
+                    algo_curr_pri = float(sell_order['price'])
+                    Profit_Cents = (((float(buy_amt / buy_price)) - (float(buy_amt / sell_price)))
+                                    * float(sell_price)) * sell_order_counter
+                    Profit_Cents = round(Profit_Cents, 2)
+                    current_time = datetime.now()
+                    formatted_time = current_time.strftime("%d-%m-%Y %H:%M:%S")
+                    print('-', formatted_time, '-', flush=True)
+                    print(float(algo_curr_pri), "= Sell price", flush=True)
+                    print(qty, "= Sell quantity", flush=True)
+                    print('Sell orders have placed -> ' + str(sell_order_counter) + 'pcs',
+                          '(' + str(Profit_Cents) + '$' + ')', flush=True)
+                    print("----------------------------", flush=True)
+            elif current_price < algo_curr_pri - (step_course * 2):
+                if should_buy(current_price, algo_curr_pri):
                     ticker = client.get_symbol_ticker(symbol=symbol)
                     current_price = float("{:.8f}".format(float(ticker["price"])))
                     qty = round(buy_amt / current_price)
                     buy_order = client.create_order(symbol=symbol, side='BUY', type='MARKET', quantity=qty)
                     buy_price = float(buy_order['fills'][0]['price'])
+                    # Add executed buy price to the set
+                    executed_buy_prices.append(buy_price)
                     print(float(buy_price), "= Buy price", flush=True)
                     print(qty, "= Buy quantity", flush=True)
                     print('Bought_Course_DOWN!', flush=True)
@@ -103,8 +107,6 @@ def step_algo(buy_amt, algo_curr_pri, sell_order_counter=0):
                     sell_order = client.create_order(symbol=symbol, side='SELL', type='LIMIT', timeInForce='GTC',
                                                      price=str(sell_price), quantity=qty)
                     sell_order_counter += 1
-                    # Add executed buy price to the set
-                    executed_buy_prices.append(buy_price)
                     algo_curr_pri = float(sell_order['price'])
                     Profit_Cents = (((float(buy_amt / buy_price)) - (float(buy_amt / sell_price)))
                                     * float(sell_price)) * sell_order_counter

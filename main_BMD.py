@@ -21,8 +21,8 @@ algo_curr_pri = 0.00000765
 
 # Keep track of price movements in the last 15 minutes
 price_history = []
-# Keep track of executed buy orders (deque with a maximum length of 144)
-executed_buy_prices = deque(maxlen=144)
+# Keep track of executed buy orders (deque with a maximum length of 3)
+executed_buy_prices = deque(maxlen=3)
 
 
 def get_price_history():

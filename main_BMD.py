@@ -35,6 +35,7 @@ def get_price_history():
 
 
 def should_buy(current_price, algo_curr_pri):
+    # Check if current_price is not equal to any of the executed buy prices
     if current_price in executed_buy_prices:
         return False
     # Calculate the price drop percentage
@@ -88,8 +89,7 @@ def step_algo(buy_amt, algo_curr_pri, sell_order_counter=0):
                 print('Sell orders have placed -> ' + str(sell_order_counter) + 'pcs',
                       '(' + str(Profit_Cents) + '$' + ')', flush=True)
                 print("----------------------------", flush=True)
-            elif current_price < algo_curr_pri - (step_course * 2):
-                if should_buy(current_price, algo_curr_pri):
+            elif current_price < algo_curr_pri - (step_course * 2) and should_buy(current_price, algo_curr_pri):
                     ticker = client.get_symbol_ticker(symbol=symbol)
                     current_price = float("{:.8f}".format(float(ticker["price"])))
                     qty = round(buy_amt / current_price)

@@ -115,8 +115,8 @@ def step_algo(buy_amt, algo_curr_pri, sell_order_counter=0):
                                                      price=sell_price, quantity=qty)
                     sell_order_counter += 1
                     algo_curr_pri = float(sell_order['price'])
-                    Profit_Cents = (((float(buy_amt / buy_price)) - (float(buy_amt / sell_price)))
-                                    * float(sell_price)) * sell_order_counter
+                    Profit_Cents = ((((float(buy_amt / buy_price)) - (float(buy_amt / sell_price)))
+                                     * float(sell_price)) - float((buy_amt * 0.075) / 100)) * sell_order_counter
                     Profit_Cents = round(Profit_Cents, 2)
                     current_time = datetime.now()
                     formatted_time = current_time.strftime("%d-%m-%Y %H:%M:%S")

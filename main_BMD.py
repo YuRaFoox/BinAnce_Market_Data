@@ -12,7 +12,7 @@ client = Client('iJw7FfZIXfo44dV9QXED8pRfBdRvFMdXsx4acSj7T4bUB7Q4nuORt4micZfq5Ns
 symbol = 'SHIBBUSD'
 
 # Define price step 0.00000005
-step_course = float("{:.8f}".format(float("0.01e-06")))
+step_course = float("{:.8f}".format(float("0.02e-06")))
 
 # Fetch current prices
 ticker = client.get_symbol_ticker(symbol=symbol)

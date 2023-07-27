@@ -9,7 +9,7 @@ client = Client('iJw7FfZIXfo44dV9QXED8pRfBdRvFMdXsx4acSj7T4bUB7Q4nuORt4micZfq5Ns
                 'wuQICi5wYpPF2D1WS4dEzAvBpvZX2HiGgIloRwYOZsvhJSMfRZnKVqzyNdE38Y1t')
 
 # Define the trading pair
-symbol = 'SHIBUSDT'
+symbol = 'SHIBBUSD'
 
 # Define price step 0.00000005
 step_course = float("{:.8f}".format(float("0.01e-06")))
@@ -17,12 +17,17 @@ step_course = float("{:.8f}".format(float("0.01e-06")))
 # Fetch current prices
 ticker = client.get_symbol_ticker(symbol=symbol)
 current_price = float("{:.8f}".format(float(ticker["price"])))
-algo_curr_pri = 0.00000765
-
+algo_curr_pri = 0.00000785
 # Keep track of price movements in the last 15 minutes
 price_history = []
 # Keep track of executed buy orders (deque with a maximum length of 3)
 executed_buy_prices = deque(maxlen=3)
+
+
+def bnb_current_price():
+    ticker = client.get_symbol_ticker(symbol='BNBBUSD')
+    current_price = round(float(ticker["price"]), 2)
+    return current_price
 
 
 def get_price_history():
@@ -44,6 +49,9 @@ def should_buy(current_price, algo_curr_pri):
     price_drop_percentage = ((algo_curr_pri - current_price) / algo_curr_pri) * 100
     if price_drop_percentage > 1:
         print('price falls >1% in last 5 minutes')
+    else:
+        # Add current_price to the executed buy prices deque
+        executed_buy_prices.append(current_price)
     return price_drop_percentage < 1
 
 
@@ -61,7 +69,6 @@ def step_algo(buy_amt, algo_curr_pri, sell_order_counter=0):
         qty = round(buy_amt / current_price)
         algo_curr_pri = algo_curr_pri
         get_price_history()
-        should_buy(current_price, algo_curr_pri)
         try:
             # Your algorithmic conditions and actions go here
             if current_price > algo_curr_pri:
@@ -79,8 +86,8 @@ def step_algo(buy_amt, algo_curr_pri, sell_order_counter=0):
                                                      price=sell_price, quantity=qty)
                     sell_order_counter += 1
                     algo_curr_pri = float(sell_order['price'])
-                    Profit_Cents = (((float(buy_amt / buy_price)) - (float(buy_amt / sell_price)))
-                                    * float(sell_price)) * sell_order_counter
+                    Profit_Cents = ((((float(buy_amt / buy_price)) - (float(buy_amt / sell_price)))
+                                    * float(sell_price)) - float((buy_amt*0.075)/100)) * sell_order_counter
                     Profit_Cents = round(Profit_Cents, 2)
                     current_time = datetime.now()
                     formatted_time = current_time.strftime("%d-%m-%Y %H:%M:%S")
@@ -105,7 +112,7 @@ def step_algo(buy_amt, algo_curr_pri, sell_order_counter=0):
                     sell_price = round(buy_price + step_course, 8)
                     sell_price = Decimal("{:.8f}".format(sell_price))
                     sell_order = client.create_order(symbol=symbol, side='SELL', type='LIMIT', timeInForce='GTC',
-                                                     price=str(sell_price), quantity=qty)
+                                                     price=sell_price, quantity=qty)
                     sell_order_counter += 1
                     algo_curr_pri = float(sell_order['price'])
                     Profit_Cents = (((float(buy_amt / buy_price)) - (float(buy_amt / sell_price)))

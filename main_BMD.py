@@ -102,17 +102,12 @@ def step_algo(buy_amt, sell_order_counter=0):
         current_price = float("{:.8f}".format(float(ticker["price"])))
         qty = round(buy_amt / current_price)
         try:
-            current_time = datetime.now()
-            formatted_time = current_time.strftime("%d-%m-%Y %H:%M:%S")
             last_buy_price_UP = last_buy_price_UP
             last_buy_price_DOWN = last_buy_price_DOWN
-            print(f'last_price_UP----->{last_buy_price_UP}')
-            print(f'last_price_DOWN--->{last_buy_price_DOWN}')
-            print(f'-{formatted_time}-', flush=True)
             # Your algorithmic conditions and actions go here
             if current_price > max_buy_price_in_orderBook():
-                print(f'current_price<--  {current_price}>{max_buy_price_in_orderBook()}  -->max_price_in_OB')
                 if should_buy() and current_price != last_buy_price_UP:
+                    print(f'current_price<--  {current_price}>{max_buy_price_in_orderBook()}  -->max_price_in_OB')
                     # Place buy order only if the current price is different from the last buy price
                     buy_order = client.create_order(symbol=symbol, side='BUY', type='MARKET', quantity=qty)
                     buy_price = float(buy_order['fills'][0]['price'])
@@ -138,8 +133,8 @@ def step_algo(buy_amt, sell_order_counter=0):
                           '(' + str(Profit_Cents) + '$' + ')', flush=True)
                     print("----------------------------", flush=True)
             elif current_price < min_buy_price_in_orderBook():
-                print(f'current_price<-- {current_price}<{min_buy_price_in_orderBook()} -->min_price_in_OB')
                 if should_buy() and current_price != last_buy_price_DOWN:
+                    print(f'current_price<-- {current_price}<{min_buy_price_in_orderBook()} -->min_price_in_OB')
                     # Place buy order only if the current price is different from the last buy price
                     ticker = client.get_symbol_ticker(symbol=symbol)
                     current_price = float("{:.8f}".format(float(ticker["price"])))
